@@ -1,4 +1,3 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Lithuania City Quiz</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
@@ -28,9 +27,14 @@
     padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
     grid-template-columns: 1fr 300px; gap: 16px; }
   @media (max-width: 820px) { .wrap { grid-template-columns: 1fr; } }
+  .head { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
+  .head > div { min-width: 0; }
   h1 { font-size: 1.4rem; margin: 0 0 4px; }
   h1 span { color: var(--accent); }
   .sub { color: var(--muted); margin: 0 0 12px; font-size: .9rem; }
+  .lang { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; flex: none; }
+  .lang button { background: transparent; color: var(--muted); border: 0; border-radius: 0; padding: 6px 12px; font-size: .85rem; letter-spacing: .05em; }
+  .lang button[aria-pressed="true"] { background: var(--accent); color: #fff; }
   .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
   .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   .prompt { font-size: 1.15rem; }
@@ -46,6 +50,7 @@
     background: var(--accent); color: #fff; cursor: pointer; font-weight: 600; }
   button.secondary { background: transparent; color: var(--ink); }
   button:disabled { opacity: .5; cursor: default; }
+  button:focus-visible { outline: 2px solid var(--guess); outline-offset: 2px; }
   table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
   th, td { text-align: left; padding: 5px 4px; border-bottom: 1px solid var(--border); font-size: .92rem; }
   td.num, th.num { text-align: right; }
@@ -58,29 +63,37 @@
   .modal .big { font-size: 2.4rem; font-weight: 800; color: var(--accent); margin: 6px 0; }
   .modal input { font: inherit; width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
     background: var(--bg); color: var(--ink); margin: 10px 0; }
-  .modal .row { display: flex; gap: 8px; justify-content: center; }
+  .modal .row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
   .label { font-size: 13px; font-weight: 700; paint-order: stroke; stroke: var(--panel); stroke-width: 3px; fill: var(--ink); pointer-events: none; }
   .rules { color: var(--muted); font-size: .85rem; margin-top: 12px; }
 </style>
 <div class="wrap">
   <main>
-    <h1>Kur yra <span>miestas?</span></h1>
-    <p class="sub">Lithuanian geography quiz — click where each city is. 10 rounds, up to 1000 points each.</p>
+    <div class="head">
+      <div>
+        <h1 data-i18n-html="h1"></h1>
+        <p class="sub" data-i18n="sub"></p>
+      </div>
+      <div class="lang" role="group" aria-label="Kalba / Language">
+        <button id="langLt" type="button" data-lang="lt" aria-pressed="true">LT</button>
+        <button id="langEn" type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
     <div class="card">
       <div class="bar">
-        <div class="prompt" id="prompt">Press <b>Start</b> to play</div>
+        <div class="prompt" id="prompt"></div>
         <div class="stats">
-          <span>Round <strong id="round">0</strong>/10</span>
-          <span>Score <strong id="score">0</strong></span>
+          <span><span data-i18n="round"></span> <strong id="round">0</strong>/10</span>
+          <span><span data-i18n="score"></span> <strong id="score">0</strong></span>
         </div>
       </div>
-      <svg id="map" viewBox="0 0 780 630" aria-label="Map of Lithuania">
+      <svg id="map" viewBox="0 0 780 630">
         <g class="hint" aria-hidden="true">
-          <text x="300" y="22">LATVIJA</text>
-          <text x="772" y="420" text-anchor="end">BALTARUSIJA</text>
-          <text x="150" y="560">LENKIJA</text>
-          <text x="40" y="380">RUSIJA</text>
-          <text x="14" y="150" text-anchor="middle" transform="rotate(-90 14 150)">BALTIJOS JŪRA</text>
+          <text x="300" y="22" data-i18n="latvia"></text>
+          <text x="772" y="420" text-anchor="end" data-i18n="belarus"></text>
+          <text x="150" y="560" data-i18n="poland"></text>
+          <text x="40" y="380" data-i18n="russia"></text>
+          <text x="14" y="150" text-anchor="middle" transform="rotate(-90 14 150)" data-i18n="sea"></text>
         </g>
         <path id="land" class="land"></path>
         <g id="marks"></g>
@@ -88,42 +101,131 @@
       <div class="feedback">
         <div id="msg">&nbsp;</div>
         <div>
-          <button id="startBtn">Start</button>
-          <button id="nextBtn" style="display:none">Next ▶</button>
+          <button id="startBtn" type="button"></button>
+          <button id="nextBtn" type="button" style="display:none"></button>
         </div>
       </div>
     </div>
   </main>
   <aside>
     <div class="card">
-      <h2>🏆 High scores</h2>
+      <h2 data-i18n="hsTitle"></h2>
       <p id="hsNote" class="empty" style="margin:0 0 8px"></p>
       <div id="hs"></div>
       <div style="margin-top:10px; text-align:right">
-        <button class="secondary" id="clearBtn">Clear</button>
+        <button class="secondary" id="clearBtn" type="button"></button>
       </div>
     </div>
-    <p class="rules">Scoring: 1000 for a perfect click, dropping with distance (≈780 at 10 km, ≈290 at 50 km). Press Enter or Space for the next city.</p>
-    <p class="rules">Border data: <a href="https://www.geoboundaries.org" target="_blank" rel="noopener" style="color:inherit">geoBoundaries</a> (CC BY 4.0).</p>
+    <p class="rules" data-i18n="rules"></p>
+    <p class="rules"><span data-i18n="credit"></span> <a href="https://www.geoboundaries.org" target="_blank" rel="noopener" style="color:inherit">geoBoundaries</a> (CC BY 4.0).</p>
   </aside>
 </div>
 
 <div class="overlay" id="over">
   <div class="modal">
-    <div>Game over!</div>
+    <div data-i18n="gameOver"></div>
     <div class="big" id="finalScore">0</div>
     <div id="finalNote" class="sub"></div>
     <div id="nameRow">
-      <input id="nameInput" maxlength="16" placeholder="Your name">
+      <input id="nameInput" maxlength="16">
     </div>
     <div class="row">
-      <button id="saveBtn">Save score</button>
-      <button class="secondary" id="againBtn">Play again</button>
+      <button id="saveBtn" type="button"></button>
+      <button class="secondary" id="againBtn" type="button"></button>
     </div>
   </div>
 </div>
 
 <script>
+// --- Language ----------------------------------------------------------------
+const T = {
+  lt: {
+    h1: "Kur yra <span>miestas?</span>",
+    sub: "Lietuvos geografijos viktorina: spustelėkite žemėlapyje, kur yra miestas. 10 raundų, iki 1000 taškų kiekviename.",
+    idle: "Paspauskite <b>Pradėti</b>", find: "Kur yra <b>{c}</b>?", over: "Žaidimas baigtas",
+    round: "Raundas", score: "Taškai", start: "Pradėti", again: "Žaisti dar kartą",
+    next: "Toliau ▶", results: "Rezultatai ▶",
+    latvia: "LATVIJA", belarus: "BALTARUSIJA", poland: "LENKIJA", russia: "RUSIJA", sea: "BALTIJOS JŪRA",
+    mapLabel: "Lietuvos žemėlapis",
+    verdicts: ["Tobula! 🎯", "Puiku!", "Arti.", "Ne visai.", "Toli gražu!"],
+    away: "{v} <strong>{d} km</strong> nuo tikslo, <strong>+{p}</strong>",
+    hsTitle: "🏆 Geriausi rezultatai", colName: "Vardas", colScore: "Taškai", colDate: "Data",
+    hsShared: "Bendra lentelė visiems žaidėjams. Skaičiuojamas kiekvieno geriausias žaidimas.",
+    hsLocal: "Išsaugota tik šioje naršyklėje.", loading: "Įkeliami rezultatai…",
+    empty: "Kol kas rezultatų nėra. Sužaiskite pirmą žaidimą!",
+    loadErr: "Nepavyko įkelti bendros lentelės. Perkraukite puslapį.",
+    clear: "Išvalyti", clearAgain: "Spauskite dar kartą", clearErr: "Nepavyko išvalyti lentelės. Bandykite dar kartą.",
+    rules: "Taškai: 1000 už tikslų spustelėjimą, mažėja tolstant (≈780 ties 10 km, ≈290 ties 50 km). Kitas miestas: Enter arba tarpo klavišas.",
+    credit: "Sienų duomenys:",
+    gameOver: "Žaidimas baigtas!", namePh: "Jūsų vardas", save: "Išsaugoti", saving: "Saugoma…", anon: "Anonimas",
+    max: "Iš galimų {m}.",
+    noWrite: "Lentelę matote, bet jūsų paskyra negali pridėti rezultatų. Paprašykite žaidimu pasidalijusio asmens redagavimo teisių.",
+    newBest: "Naujas asmeninis rekordas! Ankstesnis buvo {b}.",
+    saveShared: "Išsaugokite jį bendroje lentelėje.",
+    yourBest: "Jūsų rekordas: {b}. Viršykite jį ir pakilsite lentelėje.",
+    newHigh: "Naujas rekordas!", notTop: "Į dešimtuką nepatekote. Bandykite dar kartą!",
+    saveFail: "Nepavyko išsaugoti. Patikrinkite ryšį ir spauskite „Išsaugoti“ dar kartą."
+  },
+  en: {
+    h1: "Where is the <span>city?</span>",
+    sub: "Lithuanian geography quiz: click where each city is on the map. 10 rounds, up to 1000 points each.",
+    idle: "Press <b>Start</b> to play", find: "Find <b>{c}</b>", over: "Game over",
+    round: "Round", score: "Score", start: "Start", again: "Play again",
+    next: "Next ▶", results: "See results ▶",
+    latvia: "LATVIA", belarus: "BELARUS", poland: "POLAND", russia: "RUSSIA", sea: "BALTIC SEA",
+    mapLabel: "Map of Lithuania",
+    verdicts: ["Perfect! 🎯", "Great!", "Close.", "Not quite.", "Way off!"],
+    away: "{v} <strong>{d} km</strong> away, <strong>+{p}</strong>",
+    hsTitle: "🏆 High scores", colName: "Name", colScore: "Score", colDate: "Date",
+    hsShared: "Shared by everyone who plays this page. Each player's best game counts.",
+    hsLocal: "Saved in this browser only.", loading: "Loading scores…",
+    empty: "No scores yet. Be the first!",
+    loadErr: "Couldn't load the shared table. Reload the page to try again.",
+    clear: "Clear", clearAgain: "Click again to clear", clearErr: "Couldn't clear the table. Try again.",
+    rules: "Scoring: 1000 for a perfect click, dropping with distance (≈780 at 10 km, ≈290 at 50 km). Press Enter or Space for the next city.",
+    credit: "Border data:",
+    gameOver: "Game over!", namePh: "Your name", save: "Save score", saving: "Saving…", anon: "Anonymous",
+    max: "Out of a possible {m}.",
+    noWrite: "You can see the table, but your account can't add scores. Ask the person who shared this game for edit access.",
+    newBest: "New personal best! Your previous best was {b}.",
+    saveShared: "Save it to the shared table.",
+    yourBest: "Your best is {b}. Beat it to move up the table.",
+    newHigh: "New high score!", notTop: "Not quite top 10. Try again!",
+    saveFail: "Couldn't save your score. Check your connection and click Save again."
+  }
+};
+const LANG_KEY = "lt-city-quiz-lang";
+let lang = "lt";   // Lithuanian first; a viewer's earlier choice is remembered
+try { if (localStorage.getItem(LANG_KEY) === "en") lang = "en"; } catch {}
+const t = (key, p = {}) => String(T[lang][key]).replace(/\{(\w)\}/g, (_, k) => p[k]);
+const num = (x, digits) => { const s = x.toFixed(digits); return lang === "lt" ? s.replace(".", ",") : s; };
+
+// Dynamic text is kept as functions so a language switch can redraw it mid-game.
+let promptFn = () => t("idle"), msgFn = null, noteFn = null, startKey = "start";
+
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(e => e.textContent = t(e.dataset.i18n));
+  document.querySelectorAll("[data-i18n-html]").forEach(e => e.innerHTML = t(e.dataset.i18nHtml));
+  document.querySelectorAll(".lang button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === lang));
+  $("map").setAttribute("aria-label", t("mapLabel"));
+  $("nameInput").placeholder = t("namePh");
+  $("saveBtn").textContent = t("save");
+  $("againBtn").textContent = t("again");
+  $("startBtn").textContent = t(startKey);
+  $("nextBtn").textContent = t(round >= ROUNDS ? "results" : "next");
+  if (!clearArmed) $("clearBtn").textContent = t("clear");
+  $("prompt").innerHTML = promptFn();
+  $("msg").innerHTML = msgFn ? msgFn() : "&nbsp;";
+  $("finalNote").textContent = noteFn ? noteFn() : "";
+  renderHS();
+}
+document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => {
+  lang = b.dataset.lang;
+  try { localStorage.setItem(LANG_KEY, lang); } catch {}
+  applyLang();
+}));
+
 // --- Geography -------------------------------------------------------------
 // Lithuania's border (incl. the Curonian Spit), from geoBoundaries (gbOpen, CC BY 4.0),
 // already projected into this SVG's coordinates with proj() below.
@@ -177,7 +279,7 @@ function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.ra
 
 function start() {
   queue = shuffle(CITIES.slice()).slice(0, ROUNDS);
-  round = 0; score = 0; playing = true; lastSavedIdx = -1;
+  round = 0; score = 0; playing = true; lastSavedIdx = -1; noteFn = null;
   $("startBtn").style.display = "none";
   $("over").classList.remove("show");
   renderHS();
@@ -190,7 +292,10 @@ function nextRound() {
   round++;
   awaiting = true;
   svg.classList.remove("locked");
-  $("prompt").innerHTML = `Find <b>${queue[round-1][0]}</b>`;
+  const city = queue[round-1][0];
+  promptFn = () => t("find", { c: city });
+  msgFn = null;
+  $("prompt").innerHTML = promptFn();
   $("round").textContent = round;
   $("score").textContent = score;
   $("msg").innerHTML = "&nbsp;";
@@ -214,11 +319,12 @@ svg.addEventListener("click", e => {
   const left = cx > 640;
   el("text", { x: cx + (left ? -11 : 11), y: cy + 4, class: "label", "text-anchor": left ? "end" : "start" }, name);
 
-  const verdict = d < 5 ? "Perfect! 🎯" : d < 15 ? "Great!" : d < 40 ? "Close." : d < 100 ? "Not quite." : "Way off!";
-  $("msg").innerHTML = `${verdict} <strong>${d.toFixed(1)} km</strong> away — <strong>+${p}</strong>`;
+  const vi = d < 5 ? 0 : d < 15 ? 1 : d < 40 ? 2 : d < 100 ? 3 : 4;
+  msgFn = () => t("away", { v: T[lang].verdicts[vi], d: num(d, 1), p });
+  $("msg").innerHTML = msgFn();
   $("score").textContent = score;
   const btn = $("nextBtn");
-  btn.textContent = round >= ROUNDS ? "See results ▶" : "Next ▶";
+  btn.textContent = t(round >= ROUNDS ? "results" : "next");
   btn.style.display = "";
   btn.focus();
 });
@@ -242,21 +348,22 @@ function saveHS(list) { try { localStorage.setItem(HS_KEY, JSON.stringify(list))
 let memHS = loadHS();
 let mode = window.claude ? "loading" : "local";
 let shared = null;   // { db, uid, owner, canWrite, rows, mine }
+let loadFailed = false, clearFailed = false;
 
 // Shared rows are written by other players, so clean them before display.
-const clean = h => ({ name: String(h.name || "Anonymous").slice(0, 16), score: Math.max(0, Number(h.score) | 0),
+const clean = h => ({ name: String(h.name || t("anon")).slice(0, 16), score: Math.max(0, Number(h.score) | 0),
                       date: String(h.date || "").slice(0, 10) });
 
 function renderHS() {
   const note = $("hsNote"), clearBtn = $("clearBtn");
-  if (mode === "loading") { $("hs").innerHTML = '<p class="empty">Loading scores…</p>'; note.textContent = ""; clearBtn.hidden = true; return; }
+  if (mode === "loading") { $("hs").innerHTML = `<p class="empty">${t("loading")}</p>`; note.textContent = ""; clearBtn.hidden = true; return; }
+  note.textContent = clearFailed ? t("clearErr") : t(mode === "shared" ? "hsShared" : "hsLocal");
+  clearBtn.hidden = mode === "shared" && !shared.owner;
+  if (loadFailed) { $("hs").innerHTML = `<p class="empty">${t("loadErr")}</p>`; return; }
   const list = mode === "shared" ? shared.rows : memHS.map((h, i) => ({ ...h, key: i }));
   const mine = mode === "shared" ? shared.uid : lastSavedIdx;
-  note.textContent = mode === "shared" ? "Shared by everyone who plays this page. Each player's best game counts."
-                                       : "Saved in this browser only.";
-  clearBtn.hidden = mode === "shared" && !shared.owner;
-  if (!list.length) { $("hs").innerHTML = '<p class="empty">No scores yet. Be the first!</p>'; return; }
-  $("hs").innerHTML = `<table><tr><th>#</th><th>Name</th><th class="num">Score</th><th class="num">Date</th></tr>${
+  if (!list.length) { $("hs").innerHTML = `<p class="empty">${t("empty")}</p>`; return; }
+  $("hs").innerHTML = `<table><tr><th>#</th><th>${t("colName")}</th><th class="num">${t("colScore")}</th><th class="num">${t("colDate")}</th></tr>${
     list.map((h, i) => { const c = clean(h); return `<tr class="${h.key === mine ? "me" : ""}"><td>${i+1}</td><td>${esc(c.name)}</td>
       <td class="num">${c.score}</td><td class="num">${esc(c.date)}</td></tr>`; }).join("")}</table>`;
 }
@@ -275,29 +382,30 @@ async function initShared() {
       if (me.exists) shared.mine = clean(me.data());
     }
     db.collection("scores").orderBy("score", "desc").limit(10).onSnapshot(
-      snap => { shared.rows = snap.docs.map(d => ({ key: d.id, ...d.data() })); renderHS(); },
-      () => { $("hs").innerHTML = '<p class="empty">Couldn\'t load the shared table. Reload the page to try again.</p>'; });
+      snap => { loadFailed = false; shared.rows = snap.docs.map(d => ({ key: d.id, ...d.data() })); renderHS(); },
+      () => { loadFailed = true; renderHS(); });
   } catch { mode = "local"; }
   renderHS();
 }
 
 function finish() {
   playing = false; awaiting = false;
-  $("prompt").innerHTML = "Game over";
+  promptFn = () => t("over");
+  $("prompt").innerHTML = promptFn();
   $("nextBtn").style.display = "none";
   $("finalScore").textContent = score;
-  const max = `Out of a possible ${ROUNDS * 1000}.`;
-  let ok, note;
+  const m = ROUNDS * 1000;
+  let ok;
   if (mode === "shared") {
     const best = shared.mine ? shared.mine.score : 0;
-    if (!shared.canWrite) { ok = false; note = `${max} You can see the table, but your account can't add scores. Ask the person who shared this game for edit access.`; }
-    else if (score > best) { ok = score > 0; note = best ? `New personal best! Your previous best was ${best}.` : `${max} Save it to the shared table.`; }
-    else { ok = false; note = `Your best is ${best}. Beat it to move up the table.`; }
+    if (!shared.canWrite) { ok = false; noteFn = () => t("max", { m }) + " " + t("noWrite"); }
+    else if (score > best) { ok = score > 0; noteFn = best ? () => t("newBest", { b: best }) : () => t("max", { m }) + " " + t("saveShared"); }
+    else { ok = false; noteFn = () => t("yourBest", { b: best }); }
   } else {
     ok = score > 0 && (memHS.length < 10 || score > memHS[memHS.length - 1].score);
-    note = ok ? `New high score! ${max}` : `${max} Not quite top 10. Try again!`;
+    noteFn = ok ? () => t("newHigh") + " " + t("max", { m }) : () => t("max", { m }) + " " + t("notTop");
   }
-  $("finalNote").textContent = note;
+  $("finalNote").textContent = noteFn();
   $("nameRow").style.display = ok ? "" : "none";
   $("saveBtn").style.display = ok ? "" : "none";
   $("over").classList.add("show");
@@ -310,16 +418,18 @@ function finish() {
 
 function closeOver() {
   $("over").classList.remove("show");
-  $("startBtn").style.display = ""; $("startBtn").textContent = "Play again";
+  noteFn = null;
+  startKey = "again";
+  $("startBtn").style.display = ""; $("startBtn").textContent = t(startKey);
 }
 
 async function save() {
-  const name = $("nameInput").value.trim().slice(0, 16) || "Anonymous";
+  const name = $("nameInput").value.trim().slice(0, 16) || t("anon");
   try { localStorage.setItem(HS_KEY + "-name", name); } catch {}
   const entry = { name, score, date: new Date().toISOString().slice(0, 10) };
   if (mode === "shared") {
     const btn = $("saveBtn");
-    btn.disabled = true; btn.textContent = "Saving…";
+    btn.disabled = true; btn.textContent = t("saving");
     try {
       await shared.db.doc("scores/" + shared.uid).set(entry);
       shared.mine = entry;
@@ -327,11 +437,12 @@ async function save() {
     } catch (e) {
       if (e && e.code === "invalid_argument") {
         shared.canWrite = false; btn.style.display = "none"; $("nameRow").style.display = "none";
-        $("finalNote").textContent = "Your account can't add scores to this table. Ask the person who shared this game for edit access.";
+        noteFn = () => t("noWrite");
       } else {
-        $("finalNote").textContent = "Couldn't save your score. Check your connection and click Save again.";
+        noteFn = () => t("saveFail");
       }
-    } finally { btn.disabled = false; btn.textContent = "Save score"; }
+      $("finalNote").textContent = noteFn();
+    } finally { btn.disabled = false; btn.textContent = t("save"); }
     return;
   }
   memHS.push(entry);
@@ -349,27 +460,25 @@ let clearArmed = null;
 $("clearBtn").addEventListener("click", async () => {
   const btn = $("clearBtn");
   if (!clearArmed) {
-    btn.textContent = "Click again to clear";
-    clearArmed = setTimeout(() => { clearArmed = null; btn.textContent = "Clear"; }, 3000);
+    btn.textContent = t("clearAgain");
+    clearArmed = setTimeout(() => { clearArmed = null; btn.textContent = t("clear"); }, 3000);
     return;
   }
-  clearTimeout(clearArmed); clearArmed = null; btn.textContent = "Clear";
+  clearTimeout(clearArmed); clearArmed = null; btn.textContent = t("clear");
   if (mode === "shared") {
     // Only the owner sees this button; delete every player's row.
-    btn.disabled = true;
+    btn.disabled = true; clearFailed = false;
     try {
       const all = await shared.db.collection("scores").limit(1000).get();
       for (const d of all.docs) await shared.db.doc("scores/" + d.id).delete();
       shared.mine = null;
-    } catch { $("hsNote").textContent = "Couldn't clear the table. Try again."; }
+    } catch { clearFailed = true; renderHS(); }
     btn.disabled = false;
     return;
   }
   memHS = []; saveHS(memHS); lastSavedIdx = -1; renderHS();
 });
 
-renderHS();
+applyLang();
 if (mode === "loading") initShared();
 </script>
-
-</body></html>
