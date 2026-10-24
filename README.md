@@ -2,7 +2,7 @@
 
 A small browser game: you get the name of a Lithuanian city and click where you think it is on the map. 10 rounds, up to 1000 points each — the closer your click, the more points.
 
-**Play:** https://<your-username>.github.io/lithuania-city-quiz/
+**Play:** https://stasysgirkontas-create.github.io/lithuania-city-quiz/
 
 ## How to play
 - Press **Start**, read the city name, click the map.
